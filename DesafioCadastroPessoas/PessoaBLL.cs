@@ -1,18 +1,44 @@
-﻿using DesafioCadastroPessoas;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Text.RegularExpressions;
 
 namespace DesafioCadastroPessoas
 {
     internal class PessoaBLL
     {
-        static string formatacao;
-        static Regex regex;
+        private readonly IPessoaRepository _pessoaRepository;
+        private string formatacao;
+        private Regex regex;
 
+        public PessoaBLL(IPessoaRepository pessoaRepository)
+        {
+            _pessoaRepository = pessoaRepository;
+        }
 
+        public void Conectar()
+        {
+            try
+            {
+                _pessoaRepository.Conectar();
+            }
+            catch (Exception ex)
+            {
+                Erro.setErro($"Erro ao conectar ao banco de dados: {ex.Message}");
+            }
+        }
 
-        public static void ValidarDados(Pessoa pessoa)
+       public void Desconectar()
+        {
+            try
+            {
+                _pessoaRepository.Desconectar();
+            }
+            catch (Exception ex)
+            {
+                Erro.setErro($"Erro ao desconectar do banco de dados: {ex.Message}");
+            }
+        }
+
+        public void ValidarDados(Pessoa pessoa)
         {
             Erro.setErro(false);
 
@@ -72,70 +98,61 @@ namespace DesafioCadastroPessoas
 
             if (string.IsNullOrEmpty(pessoa.Numero))
             {
-                Erro.setErro("Numero é de preenchimento obrigatório.");
+                Erro.setErro("Número é de preenchimento obrigatório.");
                 return;
             }
 
-                // Adicione aqui outras validações, se necessário.
-
-                Erro.setErro(false); // Nenhum erro, tudo está válido
+            Erro.setErro(false); // Nenhum erro, tudo está válido
         }
-        public static void AdicionarPessoa(Pessoa pessoa)
+
+        public void AdicionarPessoa(Pessoa pessoa)
         {
             ValidarDados(pessoa);
 
             if (!Erro.getErro())
             {
-                PessoaDAL.AdicionarPessoa(pessoa);
+                _pessoaRepository.AdicionarPessoa(pessoa);
             }
         }
 
-        public static void AtualizarPessoa(Pessoa pessoa)
+        public void AtualizarPessoa(Pessoa pessoa)
         {
             ValidarDados(pessoa);
             ValidaId(pessoa.Id.ToString());
 
             if (!Erro.getErro())
             {
-                PessoaDAL.AtualizarPessoa(pessoa);
+                _pessoaRepository.AtualizarPessoa(pessoa);
             }
         }
 
-        public static void RemoverPessoa(string id)
+        public void RemoverPessoa(string id)
         {
             ValidaId(id);
 
             if (!Erro.getErro())
             {
-                PessoaDAL.RemoverPessoa(int.Parse(id));
+                _pessoaRepository.RemoverPessoa(int.Parse(id));
             }
-           
         }
 
-        public static void ValidaId(string id)
+        public Pessoa BuscarPessoaPorId(string id)
+        {
+            ValidaId(id);
+            if (!Erro.getErro())
+            {
+                return _pessoaRepository.BuscarPessoaPorId(int.Parse(id));
+            }
+            return null;
+        }
+
+        private void ValidaId(string id)
         {
             Erro.setErro(false);
             if (string.IsNullOrEmpty(id))
             {
-                Erro.setErro("Por favor forneça um Id");
-                return;
+                Erro.setErro("Por favor forneça um Id.");
             }
-
         }
-
-        public static Pessoa BuscarPessoaPorId(string id)
-        {
-            ValidaId(id);
-            if (!Erro.getErro())
-            {
-
-                return PessoaDAL.BuscarPessoaPorId(int.Parse(id));
-            }
-            return null;
-            
-        }
-
-      
-
     }
 }

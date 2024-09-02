@@ -16,7 +16,11 @@ namespace DesafioCadastroPessoas
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            // Crie uma instância da implementação concreta de IPessoaRepository
+            IPessoaRepository pessoaRepository = new PessoaDAL();
+
+            // Crie uma instância do Form1 passando o IPessoaRepository
+            Application.Run(new Form1(pessoaRepository));
         }
     }
 }

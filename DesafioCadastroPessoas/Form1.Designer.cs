@@ -131,7 +131,7 @@
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(100, 20);
             this.textBox4.TabIndex = 9;
-            this.textBox4.TextChanged += new System.EventHandler(this.textBox4_TextChanged);
+          
             this.textBox4.Leave += new System.EventHandler(this.textBox4_Leave);
             // 
             // label5
@@ -218,7 +218,7 @@
             this.textNumero.Name = "textNumero";
             this.textNumero.Size = new System.Drawing.Size(100, 20);
             this.textNumero.TabIndex = 19;
-            this.textNumero.TextChanged += new System.EventHandler(this.textBox9_TextChanged);
+    
             // 
             // label10
             // 
@@ -229,7 +229,7 @@
             this.label10.Size = new System.Drawing.Size(65, 20);
             this.label10.TabIndex = 18;
             this.label10.Text = "Número";
-            this.label10.Click += new System.EventHandler(this.label10_Click);
+      
             // 
             // textComplemento
             // 
