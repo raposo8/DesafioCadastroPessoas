@@ -1,137 +1,128 @@
-﻿using System;
-using System.Data;
+﻿using DesafioCadastroPessoas;
+using System;
 using System.Data.SqlClient;
 
-namespace DesafioCadastroPessoas
+public class PessoaDAL : IPessoaRepository
 {
-    internal class PessoaDAL 
+    private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\PessoasDB.mdf;Integrated Security=True;Connect Timeout=30;Encrypt=False";
+    private static SqlConnection conn = new SqlConnection(connectionString);
+    private static SqlCommand command;
+
+    public void Conectar()
     {
-        private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\PessoaDB.mdf;Integrated Security=True;Connect Timeout=30;Encrypt=False";
-        private static SqlConnection conn = new SqlConnection(connectionString);
-        private static SqlCommand command;
-        public static void conecta()
+        try
         {
-            try
-            {
-                conn.Open();
-            }
-            catch (Exception)
-            {
-                Erro.setErro("Banco da Dados não localizado - contacte o suporte.");
-            }
+            conn.Open();
         }
-
-        public static void desconecta()
+        catch (Exception)
         {
-            conn.Close();
+            Erro.setErro("Banco da Dados não localizado - contacte o suporte.");
         }
-        public static void AdicionarPessoa(Pessoa pessoa)
+    }
+
+    public void Desconectar()
+    {
+        conn.Close();
+    }
+
+    public void AdicionarPessoa(Pessoa pessoa)
+    {
+        string query = "INSERT INTO Pessoas (Nome, Telefone, Email, Cep, Estado, Cidade, Bairro, Rua, Numero, Complemento) VALUES (@Nome, @Telefone, @Email, @Cep, @Estado, @Cidade, @Bairro, @Rua, @Numero, @Complemento)";
+        using (SqlCommand command = new SqlCommand(query, conn))
         {
-            
-            
-                string query = "INSERT INTO Pessoas (Nome, Telefone, Email, Cep, Estado, Cidade, Bairro, Rua, Numero, Complemento) VALUES (@Nome, @Telefone, @Email, @Cep, @Estado, @Cidade, @Bairro, @Rua, @Numero, @Complemento)";
+            command.Parameters.AddWithValue("@Nome", pessoa.Nome);
+            command.Parameters.AddWithValue("@Telefone", pessoa.Telefone);
+            command.Parameters.AddWithValue("@Email", pessoa.Email);
+            command.Parameters.AddWithValue("@Cep", pessoa.Cep);
+            command.Parameters.AddWithValue("@Estado", pessoa.Estado);
+            command.Parameters.AddWithValue("@Cidade", pessoa.Cidade);
+            command.Parameters.AddWithValue("@Bairro", pessoa.Bairro);
+            command.Parameters.AddWithValue("@Rua", pessoa.Rua);
+            command.Parameters.AddWithValue("@Numero", pessoa.Numero);
+            command.Parameters.AddWithValue("@Complemento", pessoa.Complemento);
 
-                    command = new SqlCommand(query, conn);
-                
-                    command.Parameters.AddWithValue("@Nome", pessoa.Nome);
-                    command.Parameters.AddWithValue("@Telefone", pessoa.Telefone);
-                    command.Parameters.AddWithValue("@Email", pessoa.Email);
-                    command.Parameters.AddWithValue("@Cep", pessoa.Cep);
-                    command.Parameters.AddWithValue("@Estado", pessoa.Estado);
-                    command.Parameters.AddWithValue("@Cidade", pessoa.Cidade);
-                    command.Parameters.AddWithValue("@Bairro", pessoa.Bairro);
-                    command.Parameters.AddWithValue("@Rua", pessoa.Rua);
-                    command.Parameters.AddWithValue("@Numero", pessoa.Numero);
-                    command.Parameters.AddWithValue("@Complemento", pessoa.Complemento);
 
-                
-                    command.ExecuteNonQuery();
-                
-            
+            command.ExecuteNonQuery();
+
         }
+    }
 
-        public static Pessoa BuscarPessoaPorId(int id)
+    public Pessoa BuscarPessoaPorId(int id)
+    {
+        command = new SqlCommand("SELECT * FROM Pessoas WHERE Id = @Id", conn);
+        command.Parameters.AddWithValue("@Id", id);
+
+        using (SqlDataReader reader = command.ExecuteReader())
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            if (reader.Read())
             {
-                string query = "SELECT * FROM Pessoas WHERE Id = @Id";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
+                Pessoa pessoa = new Pessoa
                 {
-                    command.Parameters.AddWithValue("@Id", id);
-                    connection.Open();
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            Pessoa pessoa = new Pessoa
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                Nome = reader.GetString(reader.GetOrdinal("Nome")),
-                                Telefone = reader.GetString(reader.GetOrdinal("Telefone")),
-                                Email = reader.GetString(reader.GetOrdinal("Email")),
-                                Cep = reader.GetString(reader.GetOrdinal("Cep")),
-                                Estado = reader.GetString(reader.GetOrdinal("Estado")),
-                                Cidade = reader.GetString(reader.GetOrdinal("Cidade")),
-                                Bairro = reader.GetString(reader.GetOrdinal("Bairro")),
-                                Rua = reader.GetString(reader.GetOrdinal("Rua")),
-                                Numero = reader.GetString(reader.GetOrdinal("Numero")),
-                                Complemento = reader.GetString(reader.GetOrdinal("Complemento"))
-                            };
-                            return pessoa;
-                        }
-                        else
-                        {
-                           
-                            Erro.setErro("Usuário não encontrado");
-                            return null;
-                        }
-                    }
-                }
+                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                    Nome = reader.GetString(reader.GetOrdinal("Nome")),
+                    Telefone = reader.GetString(reader.GetOrdinal("Telefone")),
+                    Email = reader.GetString(reader.GetOrdinal("Email")),
+                    Cep = reader.GetString(reader.GetOrdinal("Cep")),
+                    Estado = reader.GetString(reader.GetOrdinal("Estado")),
+                    Cidade = reader.GetString(reader.GetOrdinal("Cidade")),
+                    Bairro = reader.GetString(reader.GetOrdinal("Bairro")),
+                    Rua = reader.GetString(reader.GetOrdinal("Rua")),
+                    Numero = reader.GetString(reader.GetOrdinal("Numero")),
+                    Complemento = reader.GetString(reader.GetOrdinal("Complemento"))
+                };
+                return pessoa;
+            }
+            else
+            {
+                Erro.setErro("Usuário não encontrado");
+                return null;
             }
         }
+    }
 
 
-        public static void AtualizarPessoa(Pessoa pessoa)
+    public void AtualizarPessoa(Pessoa pessoa)
+    {
+        using (SqlConnection connection = new SqlConnection(connectionString))
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            string query = "UPDATE Pessoas SET Nome = @Nome, Telefone = @Telefone, Email = @Email, Cep = @Cep, Estado = @Estado, Cidade = @Cidade, Bairro = @Bairro, Rua = @Rua, Numero = @Numero, Complemento = @Complemento WHERE Id = @Id";
+            using (SqlCommand command = new SqlCommand(query, conn))
             {
-                string query = "UPDATE Pessoas SET Nome = @Nome, Telefone = @Telefone, Email = @Email, Cep = @Cep, Estado = @Estado, Cidade = @Cidade, Bairro = @Bairro, Rua = @Rua, Numero = @Numero, Complemento = @Complemento WHERE Id = @Id";
+                command.Parameters.AddWithValue("@Nome", pessoa.Nome);
+                command.Parameters.AddWithValue("@Telefone", pessoa.Telefone);
+                command.Parameters.AddWithValue("@Email", pessoa.Email);
+                command.Parameters.AddWithValue("@Cep", pessoa.Cep);
+                command.Parameters.AddWithValue("@Estado", pessoa.Estado);
+                command.Parameters.AddWithValue("@Cidade", pessoa.Cidade);
+                command.Parameters.AddWithValue("@Bairro", pessoa.Bairro);
+                command.Parameters.AddWithValue("@Rua", pessoa.Rua);
+                command.Parameters.AddWithValue("@Numero", pessoa.Numero);
+                command.Parameters.AddWithValue("@Complemento", pessoa.Complemento);
+                command.Parameters.AddWithValue("@Id", pessoa.Id);
 
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Nome", pessoa.Nome);
-                    command.Parameters.AddWithValue("@Telefone", pessoa.Telefone);
-                    command.Parameters.AddWithValue("@Email", pessoa.Email);
-                    command.Parameters.AddWithValue("@Cep", pessoa.Cep);
-                    command.Parameters.AddWithValue("@Estado", pessoa.Estado);
-                    command.Parameters.AddWithValue("@Cidade", pessoa.Cidade);
-                    command.Parameters.AddWithValue("@Bairro", pessoa.Bairro);
-                    command.Parameters.AddWithValue("@Rua", pessoa.Rua);
-                    command.Parameters.AddWithValue("@Numero", pessoa.Numero);
-                    command.Parameters.AddWithValue("@Complemento", pessoa.Complemento);
-                    command.Parameters.AddWithValue("@Id", pessoa.Id);
+                command.ExecuteNonQuery();
 
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
             }
         }
+    }
 
-        public static void RemoverPessoa(int id)
+    public void RemoverPessoa(int id)
+    {
+        command = new SqlCommand("DELETE FROM Pessoas WHERE Id = @Id", conn);
+        command.Parameters.AddWithValue("@Id", id);
+       
+        if (BuscarPessoaPorId(id) is null)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                string query = "DELETE FROM Pessoas WHERE Id = @Id";
+            return;
+        }
 
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Id", id);
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
-            }
+        try
+        {
+            command.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            Erro.setErro($"Erro ao remover pessoa: {ex.Message}");
         }
     }
 }
